@@ -1,18 +1,18 @@
 package main
 
 import (
-	"os"
-	"log"
 	"bufio"
 	"fmt"
+	"log"
+	"os"
 )
-	
+
 func main() {
 	file, err := os.Open("results.txt")
-	if err != nil{
+	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	scanner := bufio.NewScanner(file)
 	var total_score = 0
 	for scanner.Scan() {
@@ -21,7 +21,7 @@ func main() {
 		var round_result = (int(results[2]) % 88) * 3
 		var my_score int = 0
 		//tie
-		if round_result == 3 {			
+		if round_result == 3 {
 			total_score = total_score + opponent_result + round_result
 		} else if round_result == 6 {
 			//win
@@ -37,7 +37,7 @@ func main() {
 				my_score = 3
 			}
 			total_score = total_score + my_score
-		} 
+		}
 	}
 	fmt.Println(total_score)
 }
