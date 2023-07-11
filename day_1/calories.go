@@ -6,6 +6,7 @@ import (
 	"bufio"
 	"strconv"
 	"fmt"
+	"sort"
 )
 	
 func main() {
@@ -17,13 +18,11 @@ func main() {
 	scanner := bufio.NewScanner(file)
 
 	var calorie_count = 0
-	var highest_calories = 0
+	var highest_calories []int;
 	for scanner.Scan() {
 		item := scanner.Text()
 		if item == ""{
-			if calorie_count > highest_calories {
-				highest_calories = calorie_count
-			}
+			highest_calories = append(highest_calories, calorie_count)
 			calorie_count = 0
 		} else {
 			single, err := strconv.Atoi(item)
@@ -33,6 +32,8 @@ func main() {
 			calorie_count += single
 		}
 	}
-	fmt.Println(highest_calories)
+	
+	sort.Sort(sort.Reverse(sort.IntSlice(highest_calories)))
+	fmt.Println(highest_calories[0] + highest_calories[1] + highest_calories[2])
 }
 
