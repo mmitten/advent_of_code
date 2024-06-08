@@ -9,24 +9,64 @@ import (
 )
 
 type Leaf struct {
-	Children []Leaf
+	Children []*Leaf
 	Type     string
 	Size     int
 	Name     string
 	Parent   *Leaf
 }
 
-func (l *Leaf) GetChildByName(name string) Leaf {
+func (l *Leaf) GetChildByName(name string) *Leaf {
 	for _, child := range l.Children {
 		if child.Name == name {
 			return child
 		}
 	}
-	return Leaf{}
+	return &Leaf{}
 }
 
-func (l *Leaf) GetParent() Leaf {
-	return *l.Parent
+func (l *Leaf) GetParent() *Leaf {
+	return l.Parent
+}
+
+func (l *Leaf) GetDirSize() int {
+	if l.Type == "file" {
+		return 0
+	} else {
+		sum := 0
+		for _, child := range l.Children {
+			if child.Type == "file" {
+				sum = sum + child.Size
+			}
+		}
+		return sum
+	}
+}
+
+func (l *Leaf) ComputeSize() {
+	if len(l.Children) == 0 {
+		return
+	}
+	for _, child := range l.Children {
+		if child.Type == "dir" && child.Size == 0 {
+			child.ComputeSize()
+		}
+	}
+	for _, child := range l.Children {
+		l.Size = l.Size + child.Size
+	}
+	return
+}
+
+func (l *Leaf) GenerateSizeMap(sizeSlice *[]int) {
+	if l.Type == "file" {
+		return
+	} else {
+		*sizeSlice = append(*sizeSlice, l.Size)
+		for _, child := range l.Children {
+			child.GenerateSizeMap(sizeSlice)
+		}
+	}
 }
 
 func readFile() []string {
@@ -46,9 +86,8 @@ func readFile() []string {
 
 func buildTree(data []string) Leaf {
 	root := Leaf{Name: "/", Type: "dir"}
-	last := root
+	last := &root
 	for i, line := range data {
-		fmt.Println(last, root)
 		if i == 0 {
 			continue
 		}
@@ -56,18 +95,21 @@ func buildTree(data []string) Leaf {
 		if cmds[0] == "$" {
 			if cmds[1] == "cd" {
 				if cmds[2] != ".." {
-					last = last.GetChildByName(cmds[1])
+					last = last.GetChildByName(cmds[2])
 				} else {
 					last = last.GetParent()
 				}
 			}
 		} else if cmds[0] == "dir" {
-			last.Children = append(last.Children, Leaf{Name: cmds[1], Type: cmds[0], Parent: &last})
+			newDir := Leaf{Name: cmds[1], Type: cmds[0], Parent: last}
+			last.Children = append(last.Children, &newDir)
 		} else {
 			sizeInt, _ := strconv.Atoi(cmds[0])
-			last.Children = append(last.Children, Leaf{Name: cmds[1], Type: "file", Size: sizeInt, Parent: &last})
+			newFile := Leaf{Name: cmds[1], Type: "file", Size: sizeInt, Parent: last}
+			last.Children = append(last.Children, &newFile)
 		}
 	}
+	root.ComputeSize()
 	return root
 }
 
@@ -75,5 +117,14 @@ func main() {
 	fmt.Println("Day 7")
 	data := readFile()
 	root := buildTree(data)
-	fmt.Println(root)
+	var part1 []int
+	root.GenerateSizeMap(&part1)
+	var total int
+	for _, size := range part1 {
+		if size < 100000 {
+			total = total + size
+		}
+	}
+
+	fmt.Println(total)
 }
