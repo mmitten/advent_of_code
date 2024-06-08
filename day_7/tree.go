@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -125,6 +126,15 @@ func main() {
 			total = total + size
 		}
 	}
+	fmt.Printf("Part 1: %d\n", total)
 
-	fmt.Println(total)
+	remainingSpace := 70000000 - root.Size
+	target := 30000000 - remainingSpace
+	sort.Ints(part1)
+	for _, size := range part1 {
+		if size > target {
+			fmt.Printf("Part 2: %d\n", size)
+			break
+		}
+	}
 }
