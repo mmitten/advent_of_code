@@ -1,1 +1,8 @@
-My run at advent of code 2022 in Golang
+My run at advent of code.
+
+## 2022
+Golang
+
+## 2024
+Rust
+
